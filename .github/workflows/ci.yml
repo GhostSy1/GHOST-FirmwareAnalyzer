@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile Python sources
+        run: python3 -m compileall -q main.py src tests
+      - name: Run unit and integration tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Check for accidental private-key material in tracked text files
+        shell: bash
+        run: |
+          if git grep -n -I -E 'BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY' -- ':!tests/test_analyzer.py'; then
+            echo 'Potential private-key material found in tracked files.'
+            exit 1
+          fi

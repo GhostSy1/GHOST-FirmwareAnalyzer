@@ -1,0 +1,15 @@
+[build-system]
+requires = []
+build-backend = "backend"
+
+[project]
+name = "ghost-firmware-analyzer"
+version = "3.0.0"
+description = "Static evidence analyzer for firmware images and extracted embedded root filesystems"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.ghost]
+execution_policy = "static-only"
+network_access = false
+external_runtime_dependencies = false

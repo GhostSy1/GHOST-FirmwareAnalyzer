@@ -1,0 +1,36 @@
+name: Quality
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile Python sources
+        shell: bash
+        run: |
+          files=$(find . -type f -name '*.py' -not -path './.git/*')
+          if [ -n "$files" ]; then
+            python3 -m compileall -q $files
+          fi
+      - name: Run repository tests when present
+        shell: bash
+        run: |
+          if [ -d tests ] && find tests -type f | grep -q .; then
+            python3 -m unittest discover -s tests -v
+          else
+            echo 'No unittest suite found; compilation check completed.'
+          fi
+      - name: Reject obvious credential material
+        shell: bash
+        run: |
+          if git grep -n -I -E 'BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{20,}'; then
+            echo 'Credential-like material was found in tracked text.'
+            exit 1
+          fi
