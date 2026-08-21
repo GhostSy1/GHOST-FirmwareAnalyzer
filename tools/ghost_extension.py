@@ -129,6 +129,7 @@ def run(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, default=Path("report.json"))
     parser.add_argument("--csv", type=Path)
     parser.add_argument("--sarif", type=Path)
+    parser.add_argument("--pdf", type=Path, help="Path to output professional PDF executive report")
     parser.add_argument("--no-clear", action="store_true")
     args = parser.parse_args(argv)
 
@@ -169,6 +170,11 @@ def run(argv: list[str] | None = None) -> int:
     if args.sarif:
         write_sarif(report, args.sarif)
         print(f"[+] SARIF report saved to: {args.sarif}")
+
+    if args.pdf:
+        from tools.pdf_generator import generate_executive_pdf
+        generate_executive_pdf(args.output, args.pdf)
+        print(f"[+] Executive PDF report saved to: {args.pdf}")
 
     print(f"[+] Completed successfully. Findings: {report['finding_count']} | Zero fake data produced.")
     return 0
