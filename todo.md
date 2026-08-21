@@ -18,3 +18,11 @@
 - [x] إضافة توثيق معماري ورسوم Mermaid ودليل حدود الكشف
 - [ ] تشغيل التحقق المحلي ومراجعة النتائج والأخطاء
 - [ ] رفع الإصدار الكامل إلى GitHub وتوثيق ما تم التحقق منه فعلياً
+
+## Professional Feature Expansion Backlog
+
+- [x] Add domain-specific validation rules and robust error boundaries
+- [x] Implement extensible report exporters (JSON, CSV, SARIF 2.1.0)
+- [ ] Incorporate append-only evidence hashing and provenance tracking
+- [x] Expand unit test coverage with realistic fixture inputs
+- [ ] Add structured remediation guidance and severity-based triage scoring

@@ -261,3 +261,14 @@ Run the repository-specific command documented above, then run the checks in `.g
 ### Responsible use
 
 Use only with explicit authorization. Do not commit credentials, private keys, customer data, or raw engagement artifacts. The repository does not provide a guarantee that an observation is a vulnerability; analysts must preserve evidence and validate conclusions independently.
+
+## Domain extension
+
+This repository includes `tools/ghost_extension.py`, a standalone local-input analyzer for the repository domain. It hashes every inspected file, records the source location for each observable indicator, and emits JSON with optional CSV and SARIF output. It does not execute supplied content, make network requests, or invoke external security utilities.
+
+```bash
+python3 tools/ghost_extension.py --input ./evidence --output report.json --sarif report.sarif
+```
+
+The extension is an evidence triage aid. A marker is not a confirmed vulnerability; validate it against the authorized environment and the repository's documented limitations.
+
