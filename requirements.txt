@@ -1,1 +1,2 @@
 # Runtime dependencies: none. The analyzer uses the Python standard library only.
+reportlab>=4.0,<5
