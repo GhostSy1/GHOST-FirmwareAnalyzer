@@ -28,7 +28,7 @@ def generate_executive_pdf(report_json_path: Path, output_pdf_path: Path) -> Pat
         ["Assessment Timestamp", str(data.get("analyzed_at"))],
         ["Total Artifacts Inspected", str(data.get("artifact_count"))],
         ["Total Findings Discovered", str(data.get("finding_count"))],
-        ["Zero-Simulation Verified", str(data.get("metadata", {}).get("zero_simulation_verified", True))]
+        ["Source-Bound Verified", str(data.get("metadata", {}).get("source_bound_verified", True))]
     ]
     t = Table(summary_data, colWidths=[160, 380])
     t.setStyle(TableStyle([

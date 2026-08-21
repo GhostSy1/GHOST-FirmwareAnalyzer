@@ -100,7 +100,7 @@ def analyze(target: Path) -> dict:
             "execution_performed": False,
             "network_access_performed": False,
             "external_tools_invoked": False,
-            "zero_simulation_verified": True
+            "source_bound_verified": True
         }
     }
 
@@ -129,7 +129,7 @@ def run(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, default=Path("report.json"))
     parser.add_argument("--csv", type=Path)
     parser.add_argument("--sarif", type=Path)
-    parser.add_argument("--pdf", type=Path, help="Path to output professional PDF executive report")
+    parser.add_argument("--pdf", type=Path, help="Path to output PDF report")
     parser.add_argument("--no-clear", action="store_true")
     args = parser.parse_args(argv)
 
@@ -154,7 +154,7 @@ def run(argv: list[str] | None = None) -> int:
         print(f"[!] Error: target does not exist: {target}")
         return 2
 
-    print(f"[*] Analyzing target: {target.resolve()} (Strict Zero-Simulation Mode)...")
+    print(f"[*] Analyzing target: {target.resolve()} (Source-Bound Mode)...")
     report = analyze(target)
 
     args.output.write_text(json.dumps(report, indent=2), encoding="utf-8")
@@ -176,7 +176,7 @@ def run(argv: list[str] | None = None) -> int:
         generate_executive_pdf(args.output, args.pdf)
         print(f"[+] Executive PDF report saved to: {args.pdf}")
 
-    print(f"[+] Completed successfully. Findings: {report['finding_count']} | Zero fake data produced.")
+    print(f"[+] Completed successfully. Findings: {report['finding_count']} | Only supplied data processed.")
     return 0
 
 

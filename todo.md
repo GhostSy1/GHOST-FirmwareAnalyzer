@@ -26,3 +26,9 @@
 - [ ] Incorporate append-only evidence hashing and provenance tracking
 - [x] Expand unit test coverage with realistic fixture inputs
 - [ ] Add structured remediation guidance and severity-based triage scoring
+- [ ] Launch without arguments and prompt for required target input
+- [ ] Prompt for report paths with sensible defaults
+- [ ] Keep --help concise and preserve non-interactive execution
+- [ ] Keep README and CLI reference aligned with the actual prompts
+- [ ] Add an interactive execution check
+- [ ] Remove code comments from files changed in this pass
