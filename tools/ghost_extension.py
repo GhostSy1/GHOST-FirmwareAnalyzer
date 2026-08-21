@@ -6,30 +6,35 @@ import hashlib
 import json
 import re
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 TOOL = "GHOST-FirmwareAnalyzer"
-VERSION = "2.0.0"
-PROFILE = "Firmware and extracted root filesystem inventory"
-RULES = [('FW-SERVICE', 'telnetd|dropbear|rpcd|gdbserver'), ('FW-PROTOCOL', 'mqtt|tftp|http|AF_PACKET|SOCK_RAW'), ('FW-DEBUG', 'jtag|swd|debug[_ -]?enable|secure[_ -]?boot')]
+VERSION = "3.0-PRO"
+PROFILE = "Binary firmware and embedded filesystem inspector"
+RULES = [('FW-SERVICE', 'telnetd|dropbear|rpcd|gdbserver'), ('FW-PROTOCOL', 'mqtt|tftp|http|AF_PACKET|SOCK_RAW'), ('FW-DEBUG', 'jtag|swd|debug_enable|secure_boot')]
 
 
 def clear_screen() -> None:
     if sys.stdout.isatty():
-        print("\033[2J\033[H", end="")
+        print("\\033[2J\\033[H", end="")
 
 
 def render_banner() -> None:
-    banner = r"""
+    banner = r\"\"\"
    _____ _   _  ____  ____ _____
-  / ____| | | |/ __ \ / __ \_   _|
+  / ____| | | |/ __ \\ / __ \\_   _|
  | |  __| |_| | |  | | |  | || |
  | | |_ |  _  | |  | | |  | || |
  | |__| | | | | |__| | |__| || |_
-  \_____|_| |_|\____/ \____/_____|
-      GHOST-FirmwareAnalyzer v2.0-PRO (Zero-Guessing Engine)
-"""
+  \\_____|_| |_|\\____/ \\____/_____|
+      GHOST-FirmwareAnalyzer v3.0-PRO (Zero-Guessing Engine)
+\"\"\"
     print(banner)
+
+
+def now_utc() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 def digest(path: Path) -> str:
@@ -40,14 +45,11 @@ def digest(path: Path) -> str:
     return h.hexdigest()
 
 
-def evidence(value: str, redact: bool) -> str:
-    value = value.strip().replace("\x00", "")[:260]
-    if redact:
-        return re.sub(r"(?i)(api[_-]?key|access[_-]?token|bearer|password|secret|private[_ -]?key)\s*[:=]?\s*[^\s,;]+", r"\1=[REDACTED]", value)
-    return value
+def evidence(value: str) -> str:
+    return value.strip().replace("\\x00", "")[:280]
 
 
-def scan_file(path: Path, redact: bool) -> list[dict]:
+def scan_file(path: Path) -> list[dict]:
     findings = []
     try:
         data = path.read_bytes()
@@ -59,14 +61,14 @@ def scan_file(path: Path, redact: bool) -> list[dict]:
             if re.search(pattern, line, re.I):
                 findings.append({
                     "rule_id": rule_id,
-                    "severity": "high" if "KEY" in rule_id or "PRIV" in rule_id or "ROOT" in rule_id else "medium",
+                    "severity": "high" if any(k in rule_id for k in ["PUBLIC", "WEAK", "KEY", "PRIV", "ROOT", "SUID", "OPEN", "IMPLICIT", "FAIL"]) else "medium",
                     "confidence": "high",
-                    "title": f"Observable indicator: {{rule_id}}",
-                    "description": f"Matched pattern {{rule_id}} in target file.",
-                    "evidence": evidence(line, redact),
+                    "title": f"Observable risk indicator: {{rule_id}}",
+                    "description": f"Matched rule {{rule_id}} in inspected artifact.",
+                    "evidence": evidence(line),
                     "source": "operator-input",
                     "location": f"{{path}}:{{line_no}}",
-                    "remediation": "Review the configuration or code against security hardening benchmarks."
+                    "remediation": "Validate configuration, harden target posture, or remediate finding in source."
                 })
     return findings
 
@@ -82,13 +84,14 @@ def analyze(target: Path) -> dict:
         except OSError:
             continue
         artifacts.append({"path": str(path.resolve()), "size_bytes": size, "sha256": h})
-        findings.extend(scan_file(path, TOOL == "GHOST-SecretsScanner"))
+        findings.extend(scan_file(path))
     return {
-        "schema_version": "2.0.0",
+        "schema_version": "3.0.0",
         "tool": TOOL,
         "version": VERSION,
         "profile": PROFILE,
         "target": str(target.resolve()),
+        "analyzed_at": now_utc(),
         "artifact_count": len(artifacts),
         "finding_count": len(findings),
         "artifacts": artifacts,
@@ -141,7 +144,7 @@ def run(argv: list[str] | None = None) -> int:
                 if raw:
                     target = Path(raw)
             except (KeyboardInterrupt, EOFError):
-                print("\n[!] Aborted by operator.")
+                print("\\n[!] Aborted by operator.")
                 return 1
         if not target:
             parser.error("--input is required in non-interactive mode.")
